@@ -1,5 +1,5 @@
-import { Count } from "./src/components/Count";
+import { HomeScreen } from "./src/screens/HomeScreen";
 
 export default function App() {
-    return <Count />;
+  return <HomeScreen />;
 }
