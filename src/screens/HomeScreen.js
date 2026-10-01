@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet } from "react-native";
+import { colors } from "../constants/colors";
 
 export const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>TaskFlow</Text>
-      <Text style={styles.subtitle}>Checkpoint 1: Estructura Base</Text>
-      <Text style={styles.status}>Estructura base lista</Text>
+      <Text style={styles.subtitle}>Mis tareas</Text>
+      <Text style={styles.status}>Todavía no hay tareas cargadas.</Text>
     </View>
   );
 };
@@ -13,23 +14,27 @@ export const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5F7FA",
+    backgroundColor: colors.background,
+    padding: 24,
+    paddingTop: 60,
   },
 
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    marginBottom: 10,
+    color: colors.text,
+    marginBottom: 8,
   },
 
   subtitle: {
-    fontSize: 18,
-    marginBottom: 8,
+    fontSize: 22,
+    fontWeight: "600",
+    color: colors.primary,
+    marginBottom: 12,
   },
 
   status: {
     fontSize: 16,
+    color: colors.textSecondary,
   },
 });

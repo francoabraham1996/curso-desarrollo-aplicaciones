@@ -1,23 +1,40 @@
 # TaskFlow
 
-TaskFlow es una aplicación móvil desarrollada con React Native y Expo como parte del curso de Desarrollo de Aplicaciones.
+Aplicación móvil desarrollada con React Native y Expo como proyecto del curso de Desarrollo de Aplicaciones.
 
 ## Checkpoint 1 - Estructura Base
 
-En esta primera etapa se configuró la estructura inicial del proyecto utilizando Expo Managed Workflow.
+Se creó la estructura inicial del proyecto utilizando Expo y React Native.
 
-La aplicación cuenta con una organización base dentro de `src`:
+## Checkpoint 2 - Pantallas iniciales y ProfileCard
 
-- `components`: componentes reutilizables.
-- `screens`: pantallas principales de la aplicación.
-- `assets`: recursos locales como imágenes y fuentes.
-- `theme`: destinada a estilos y constantes globales.
+En este checkpoint se incorporaron:
 
-La pantalla inicial muestra el nombre **TaskFlow**, el checkpoint actual y el estado de la estructura base.
+- HomeScreen.
+- ProfileScreen.
+- Componente reutilizable ProfileCard.
+- Uso de props para mostrar nombre, rol e imagen.
+- Uso de Image de React Native.
+- Estilos mediante StyleSheet.
+- Colores centralizados en src/constants/colors.js.
+- Soporte para ejecución en Android y Web.
+
+## Estructura
+
+src/
+- assets/
+- components/
+  - Count.js
+  - ProfileCard.js
+- constants/
+  - colors.js
+- screens/
+  - HomeScreen.js
+  - ProfileScreen.js
 
 ## Ejecutar el proyecto
 
-1. Instalar las dependencias:
+Instalar dependencias:
 
 ```bash
 npm install
