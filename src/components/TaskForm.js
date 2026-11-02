@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 
-export default function TaskForm() {
+export default function TaskForm({ onAddTask }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("trabajo");
@@ -37,6 +37,7 @@ export default function TaskForm() {
     };
 
     console.log("Tarea creada:", task);
+    onAddTask(task);
     Alert.alert("Éxito", "Tarea capturada localmente");
 
     setTitle("");
