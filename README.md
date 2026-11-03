@@ -38,3 +38,37 @@ Instalar dependencias:
 
 ```bash
 npm install
+
+
+# TaskFlow
+
+Aplicación de tareas desarrollada con React Native y Expo.
+
+## Funcionalidades
+
+- Crear tareas con título, descripción y categoría.
+- Ver la lista de tareas.
+- Ver el detalle de cada tarea.
+- Navegar entre Tareas y Perfil.
+- Volver a la lista después de guardar una tarea.
+
+## Navegación
+
+Utilicé React Navigation con dos navegadores:
+
+- Bottom Tabs: para cambiar entre Tareas y Perfil.
+- Native Stack: para navegar entre la lista, el formulario y el detalle.
+
+## Tecnologías
+
+- React Native
+- Expo
+- React Navigation
+- useState
+- FlatList
+
+## Ejecutar el proyecto
+
+npm install
+
+npx expo start

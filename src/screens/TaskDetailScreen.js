@@ -1,7 +1,9 @@
 
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function TaskDetailScreen({ task, onBack }) {
+export default function TaskDetailScreen({ navigation, route }) {
+  const { task } = route.params;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Detalle de tarea</Text>
@@ -13,7 +15,10 @@ export default function TaskDetailScreen({ task, onBack }) {
         Fecha: {new Date(task.createdAt).toLocaleDateString()}
       </Text>
 
-      <TouchableOpacity style={styles.button} onPress={onBack}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.goBack()}
+      >
         <Text style={styles.buttonText}>Volver</Text>
       </TouchableOpacity>
     </View>
