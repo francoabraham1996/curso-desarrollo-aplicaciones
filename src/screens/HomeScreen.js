@@ -1,4 +1,8 @@
-
+import { useEffect } from "react";
+import { Alert } from "react-native";
+import { auth } from "../firebase/firebaseConfig";
+import { getTasks } from "../firebase/taskService";
+import { setTasks, clearTasks } from "../redux/taskSlice";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { setFilter } from "../redux/taskSlice";
@@ -8,6 +12,25 @@ export const HomeScreen = ({ navigation }) => {
   const tasks = useSelector((state) => state.tasks.items);
   const filter = useSelector((state) => state.tasks.filter);
   const dispatch = useDispatch();
+  useEffect(() => {
+    const cargarTareas = async () => {
+      try {
+        dispatch(clearTasks());
+
+        const userId = auth.currentUser.uid;
+        const tareas = await getTasks(userId);
+
+        dispatch(setTasks(tareas));
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Error", "No se pudieron cargar las tareas");
+      }
+    };
+
+    if (auth.currentUser) {
+      cargarTareas();
+    }
+  }, [dispatch]);
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") {

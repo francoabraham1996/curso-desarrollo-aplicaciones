@@ -93,3 +93,15 @@ En este módulo agregué Redux Toolkit para manejar las tareas.
 ### Librerías utilizadas
 - @reduxjs/toolkit
 - react-redux
+
+## Módulo 7 - Firebase
+
+- Registro e inicio de sesión con Firebase Authentication.
+- Sesión de usuario.
+- Tareas guardadas en Firestore.
+- Crear, completar y eliminar tareas.
+- Tareas separadas por usuario.
+- Redux Toolkit para mostrar las tareas.
+
+Probé el registro, inicio de sesión y guardado
+de tareas desde Expo Go.

@@ -1,4 +1,5 @@
-
+import { auth } from "../firebase/firebaseConfig";
+import { saveTask } from "../firebase/taskService";
 import { useState } from "react";
 import {
     Alert,
@@ -25,7 +26,7 @@ export default function TaskForm({ navigation }) {
 
     const dispatch = useDispatch();
 
-    const handleAddTask = () => {
+    const handleAddTask = async () => {
         setTouchedTitle(true);
         setTouchedDescription(true);
 
@@ -41,8 +42,21 @@ export default function TaskForm({ navigation }) {
         };
 
         console.log("Tarea creada:", task);
-        dispatch(addTask(task));
-        navigation.popTo("TaskList");
+        try {
+            const userId = auth.currentUser.uid;
+            const id = await saveTask(task, userId);
+
+            dispatch(addTask({
+                ...task,
+                id: id,
+                createdAt: new Date().toISOString(),
+            }));
+
+            navigation.popTo("TaskList");
+        } catch (error) {
+            Alert.alert("Error", "No se pudo guardar la tarea");
+            return;
+        }
         Alert.alert("Éxito", "Tarea capturada localmente");
 
         setTitle("");
