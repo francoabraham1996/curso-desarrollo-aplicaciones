@@ -72,3 +72,24 @@ Utilicé React Navigation con dos navegadores:
 npm install
 
 npx expo start
+
+## Módulo 6 - Redux Toolkit
+
+En este módulo agregué Redux Toolkit para manejar las tareas.
+
+### Funcionalidades
+- Crear tareas.
+- Marcar tareas como completadas o pendientes.
+- Eliminar tareas.
+- Filtrar por todas, pendientes o completadas.
+- Mantener las tareas y filtros al cambiar de pantalla.
+
+### Redux
+- store.js: configura el estado global.
+- taskSlice.js: contiene las tareas y sus acciones.
+- useSelector: permite obtener las tareas.
+- useDispatch: permite agregar, completar y eliminar tareas.
+
+### Librerías utilizadas
+- @reduxjs/toolkit
+- react-redux

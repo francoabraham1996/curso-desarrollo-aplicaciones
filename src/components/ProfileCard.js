@@ -3,6 +3,26 @@ import { colors } from "../constants/colors";
 
 // View será el contenedor de la tarjeta, Text mostrará nombre y rol, Image mostrará el avatar y StyleSheet nos permitirá diseñarla sin meter estilos grandes directamente en el JSX.
 
+// type Props = {
+//     name: String;
+//     role: String;
+//     image: String,
+// }
+
+// function ProfileCard({name, role, image} : Props) {
+//     return(
+//         <view>
+//             <Image source={{uri: image} style={}}/>
+//             <view>
+//                 <text>{name}</text>
+//                 <text>{role}</text>
+//             </view>
+//         </view>
+//     )
+// }
+
+
+
 export const ProfileCard = ({ name, role, image }) => {
   return (
     <View style={styles.card}>
