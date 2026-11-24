@@ -1,16 +1,21 @@
 
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import {
+    initializeAuth,
+    getReactNativePersistence,
+} from "firebase/auth";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDmF2wotrVgA6BsvApzE-BFaSccxn1UDWc",
-    authDomain: "taskflow-40926.firebaseapp.com",
-    projectId: "taskflow-40926",
-    storageBucket: "taskflow-40926.firebasestorage.app",
-    messagingSenderId: "1013479706111",
-    appId: "1:1013479706111:web:c7362eaf00dfcc0e0d2bca",
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId:
+        process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -18,4 +23,5 @@ const app = initializeApp(firebaseConfig);
 export const auth = initializeAuth(app, {
     persistence: getReactNativePersistence(AsyncStorage),
 });
+
 export const db = getFirestore(app);

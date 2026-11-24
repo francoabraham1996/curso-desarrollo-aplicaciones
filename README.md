@@ -1,107 +1,87 @@
-# TaskFlow
-
-Aplicación móvil desarrollada con React Native y Expo como proyecto del curso de Desarrollo de Aplicaciones.
-
-## Checkpoint 1 - Estructura Base
-
-Se creó la estructura inicial del proyecto utilizando Expo y React Native.
-
-## Checkpoint 2 - Pantallas iniciales y ProfileCard
-
-En este checkpoint se incorporaron:
-
-- HomeScreen.
-- ProfileScreen.
-- Componente reutilizable ProfileCard.
-- Uso de props para mostrar nombre, rol e imagen.
-- Uso de Image de React Native.
-- Estilos mediante StyleSheet.
-- Colores centralizados en src/constants/colors.js.
-- Soporte para ejecución en Android y Web.
-
-## Estructura
-
-src/
-- assets/
-- components/
-  - Count.js
-  - ProfileCard.js
-- constants/
-  - colors.js
-- screens/
-  - HomeScreen.js
-  - ProfileScreen.js
-
-## Ejecutar el proyecto
-
-Instalar dependencias:
-
-```bash
-npm install
-
 
 # TaskFlow
 
-Aplicación de tareas desarrollada con React Native y Expo.
+Aplicación móvil de gestión de tareas desarrollada con React Native y Expo como proyecto final del curso de Desarrollo de Aplicaciones.
 
 ## Funcionalidades
 
-- Crear tareas con título, descripción y categoría.
-- Ver la lista de tareas.
-- Ver el detalle de cada tarea.
-- Navegar entre Tareas y Perfil.
-- Volver a la lista después de guardar una tarea.
+- Registro e inicio de sesión con Firebase Authentication.
+- Persistencia de sesión.
+- Creación, visualización y eliminación de tareas.
+- Clasificación de tareas por categorías.
+- Filtros de tareas pendientes y completadas.
+- Sincronización en tiempo real con Firestore.
+- Gestión del estado global mediante Redux Toolkit.
+- Perfil personalizado con Expo ImagePicker.
+- Persistencia local de la foto de perfil.
+- Cierre de sesión seguro.
+- Navegación mediante Bottom Tabs y Stack.
+- Indicadores de carga y estados de sincronización.
 
-## Navegación
-
-Utilicé React Navigation con dos navegadores:
-
-- Bottom Tabs: para cambiar entre Tareas y Perfil.
-- Native Stack: para navegar entre la lista, el formulario y el detalle.
-
-## Tecnologías
+## Tecnologías utilizadas
 
 - React Native
 - Expo
+- JavaScript
+- Redux Toolkit
 - React Navigation
-- useState
-- FlatList
+- Firebase Authentication
+- Cloud Firestore
+- Expo ImagePicker
+- Expo FileSystem
+- AsyncStorage
+- Expo Vector Icons
 
-## Ejecutar el proyecto
+## Instalación
 
-npm install
+1. Clonar el repositorio.
+2. Ejecutar `npm install`.
+3. Crear un archivo `.env` utilizando `.env.example` como referencia.
+4. Completar las variables con la configuración de Firebase.
+5. Habilitar Authentication con correo y contraseña.
+6. Configurar Firestore utilizando las reglas de `firestore.rules`.
+7. Ejecutar `npx expo start`.
 
-npx expo start
+La aplicación puede ejecutarse desde Expo Go o desde el navegador presionando la tecla W.
 
-## Módulo 6 - Redux Toolkit
+## Arquitectura
 
-En este módulo agregué Redux Toolkit para manejar las tareas.
+El proyecto utiliza una estructura modular organizada en componentes, pantallas, navegación, servicios, hooks personalizados y Redux.
 
-### Funcionalidades
-- Crear tareas.
-- Marcar tareas como completadas o pendientes.
-- Eliminar tareas.
-- Filtrar por todas, pendientes o completadas.
-- Mantener las tareas y filtros al cambiar de pantalla.
+El hook useTaskSync permite mantener sincronizadas las tareas de Firestore con el estado global de Redux.
 
-### Redux
-- store.js: configura el estado global.
-- taskSlice.js: contiene las tareas y sus acciones.
-- useSelector: permite obtener las tareas.
-- useDispatch: permite agregar, completar y eliminar tareas.
+## Seguridad
 
-### Librerías utilizadas
-- @reduxjs/toolkit
-- react-redux
+Las reglas de Firestore restringen el acceso a las tareas según el identificador del usuario autenticado.
 
-## Módulo 7 - Firebase
+La configuración de Firebase se administra mediante variables de entorno.
 
-- Registro e inicio de sesión con Firebase Authentication.
-- Sesión de usuario.
-- Tareas guardadas en Firestore.
-- Crear, completar y eliminar tareas.
-- Tareas separadas por usuario.
-- Redux Toolkit para mostrar las tareas.
+## Capturas de pantalla
 
-Probé el registro, inicio de sesión y guardado
-de tareas desde Expo Go.
+### Inicio de sesión
+
+![Login](screenshots/login.png)
+
+### Registro
+
+![Registro](screenshots/register.png)
+
+### Lista de tareas
+
+![Tareas](screenshots/tasks.png)
+
+### Detalle de tarea
+
+![Detalle](screenshots/detail.png)
+
+### Perfil personalizado
+
+![Perfil](screenshots/profile.png)
+
+## Autor
+
+Franco Abraham
+
+Proyecto final del curso de Desarrollo de Aplicaciones.
+
+2026.
