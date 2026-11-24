@@ -1,13 +1,18 @@
 
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+    items: [],
+    filter: "all",
+    loading: true,
+    error: null,
+    fromCache: false,
+    hasPendingWrites: false,
+};
+
 const taskSlice = createSlice({
     name: "tasks",
-
-    initialState: {
-        items: [],
-        filter: "all",
-    },
+    initialState,
 
     reducers: {
         addTask: (state, action) => {
@@ -38,13 +43,32 @@ const taskSlice = createSlice({
             state.items = action.payload;
         },
 
-        clearTasks: (state) => {
-            state.items = [];
-            state.filter = "all";
-        },
+        clearTasks: () => ({
+            ...initialState,
+            items: [],
+        }),
 
         setFilter: (state, action) => {
             state.filter = action.payload;
+        },
+
+        setTasksLoading: (state, action) => {
+            state.loading = action.payload;
+        },
+
+        setTasksError: (state, action) => {
+            state.error = action.payload;
+            state.loading = false;
+        },
+
+        setTasksSync: (state, action) => {
+            state.items = action.payload.tasks;
+            state.fromCache = action.payload.fromCache;
+            state.hasPendingWrites =
+                action.payload.hasPendingWrites;
+
+            state.loading = false;
+            state.error = null;
         },
     },
 });
@@ -56,6 +80,9 @@ export const {
     setFilter,
     setTasks,
     clearTasks,
+    setTasksLoading,
+    setTasksError,
+    setTasksSync,
 } = taskSlice.actions;
 
 export default taskSlice.reducer;

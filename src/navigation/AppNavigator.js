@@ -21,6 +21,7 @@ import TaskDetailScreen from "../screens/TaskDetailScreen";
 import TaskForm from "../components/TaskForm";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
+import { useTaskSync } from "../hooks/useTaskSync";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -86,6 +87,8 @@ export default function AppNavigator() {
     const dispatch = useDispatch();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    useTaskSync(loading ? null : user?.uid);
 
     useEffect(() => {
         let active = true;

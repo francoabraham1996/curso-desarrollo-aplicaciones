@@ -8,48 +8,92 @@ import {
     updateDoc,
     deleteDoc,
     doc,
+    onSnapshot,
 } from "firebase/firestore";
 
-import { db } from "./firebaseConfig";
+import { db, auth } from "./firebaseConfig";
 
-// Guardar una tarea
-export const saveTask = async (task, userId) => {
-    const nuevaTarea = {
-        title: task.title,
-        description: task.description,
-        category: task.category,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        userId: userId,
-    };
-
-    const resultado = await addDoc(collection(db, "tasks"), nuevaTarea);
-    return resultado.id;
-};
-
-// Obtener tareas del usuario
-export const getTasks = async (userId) => {
-    const consulta = query(
+const getUserTasksQuery = (userId) => {
+    return query(
         collection(db, "tasks"),
         where("userId", "==", userId)
     );
-
-    const resultado = await getDocs(consulta);
-
-    return resultado.docs.map((documento) => ({
-        ...documento.data(),
-        id: documento.id,
-    }));
 };
 
-// Cambiar el estado de una tarea
+const mapTasks = (snapshot) => {
+    return snapshot.docs
+        .map((documento) => ({
+            ...documento.data(),
+            id: documento.id,
+        }))
+        .sort((a, b) =>
+            (b.createdAt || "").localeCompare(a.createdAt || "")
+        );
+};
+
+export const saveTask = async (task, userId) => {
+    if (!userId || auth.currentUser?.uid !== userId) {
+        throw new Error("Usuario no autenticado");
+    }
+
+    const nuevaTarea = {
+        title: task.title.trim(),
+        description: task.description.trim(),
+        category: task.category,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        userId,
+    };
+
+    const resultado = await addDoc(
+        collection(db, "tasks"),
+        nuevaTarea
+    );
+
+    return resultado.id;
+};
+
+export const getTasks = async (userId) => {
+    const resultado = await getDocs(
+        getUserTasksQuery(userId)
+    );
+
+    return mapTasks(resultado);
+};
+
+export const subscribeToTasks = (
+    userId,
+    onUpdate,
+    onError
+) => {
+    return onSnapshot(
+        getUserTasksQuery(userId),
+        { includeMetadataChanges: true },
+        (snapshot) => {
+            onUpdate({
+                tasks: mapTasks(snapshot),
+                fromCache: snapshot.metadata.fromCache,
+                hasPendingWrites: snapshot.metadata.hasPendingWrites,
+            });
+        },
+        onError
+    );
+};
+
 export const updateTaskStatus = async (taskId, completed) => {
+    if (!auth.currentUser) {
+        throw new Error("Usuario no autenticado");
+    }
+
     await updateDoc(doc(db, "tasks", taskId), {
-        completed: completed,
+        completed,
     });
 };
 
-// Eliminar una tarea
 export const removeTask = async (taskId) => {
+    if (!auth.currentUser) {
+        throw new Error("Usuario no autenticado");
+    }
+
     await deleteDoc(doc(db, "tasks", taskId));
 };
