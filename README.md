@@ -85,3 +85,11 @@ Franco Abraham
 Proyecto final del curso de Desarrollo de Aplicaciones.
 
 2026.
+
+## Aplicación desplegada
+
+TaskFlow fue compilado mediante EAS Build para Android.
+
+- [Descargar e instalar TaskFlow (APK)](https://expo.dev/accounts/francoab96/projects/taskflow/builds/58f372bb-c1cc-4eaa-b263-873dc8c6e455)
+
+La aplicación puede instalarse sin necesidad de Expo Go.
