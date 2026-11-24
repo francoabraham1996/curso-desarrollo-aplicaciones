@@ -1,92 +1,124 @@
 
-import { useState } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-} from "react-native";
+import { useState, useRef } from "react";
 
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+
+import {
+    AuthLayout,
+    AuthInput,
+    AuthButton,
+    AuthError,
+    AuthFooter,
+} from "../components/AuthLayout";
+
+import {
+    isValidEmail,
+    getAuthError,
+} from "../services/authService";
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [submitted, setSubmitted] = useState(false);
+
+    const loadingRef = useRef(false);
+
+    const emailError =
+        submitted && !isValidEmail(email)
+            ? "Ingresá un correo válido."
+            : "";
+
+    const passwordError =
+        submitted && !password
+            ? "Ingresá tu contraseña."
+            : "";
+
     const handleLogin = async () => {
+        if (loadingRef.current) return;
+
+        setSubmitted(true);
+        setError("");
+
+        if (!isValidEmail(email) || !password) {
+            return;
+        }
+
+        loadingRef.current = true;
+        setLoading(true);
+
         try {
-            await signInWithEmailAndPassword(auth, email.trim(), password);
+            await signInWithEmailAndPassword(
+                auth,
+                email.trim(),
+                password
+            );
         } catch (error) {
-            Alert.alert("Error", "No se pudo iniciar sesión. Revisá tus datos.");
+            setError(getAuthError(error));
+        } finally {
+            loadingRef.current = false;
+            setLoading(false);
         }
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Iniciar sesión</Text>
-
-            <TextInput
-                style={styles.input}
-                placeholder="Correo electrónico"
+        <AuthLayout
+            title="¡Bienvenido!"
+            subtitle="Iniciá sesión para acceder a tus tareas."
+            footer={
+                <AuthFooter
+                    text="¿Todavía no tenés cuenta?"
+                    action="Crear cuenta"
+                    disabled={loading}
+                    onPress={() => navigation.navigate("Register")}
+                />
+            }
+        >
+            <AuthInput
+                label="Correo electrónico"
+                icon="mail-outline"
+                placeholder="usuario@email.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(value) => {
+                    setEmail(value);
+                    setError("");
+                }}
                 autoCapitalize="none"
+                autoCorrect={false}
                 keyboardType="email-address"
+                autoComplete="email"
+                editable={!loading}
+                error={emailError}
             />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
+            <AuthInput
+                label="Contraseña"
+                icon="lock-closed-outline"
+                placeholder="Ingresá tu contraseña"
                 value={password}
-                onChangeText={setPassword}
-                secureTextEntry
+                onChangeText={(value) => {
+                    setPassword(value);
+                    setError("");
+                }}
+                password
+                autoCapitalize="none"
+                autoComplete="current-password"
+                editable={!loading}
+                error={passwordError}
+                returnKeyType="go"
+                onSubmitEditing={handleLogin}
             />
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Ingresar</Text>
-            </TouchableOpacity>
+            <AuthError message={error} />
 
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                <Text style={styles.link}>Crear una cuenta</Text>
-            </TouchableOpacity>
-        </View>
+            <AuthButton
+                title="Iniciar sesión"
+                loading={loading}
+                onPress={handleLogin}
+            />
+        </AuthLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        justifyContent: "center",
-        backgroundColor: "#f5f5f5",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-    },
-    input: {
-        backgroundColor: "white",
-        borderWidth: 1,
-        borderColor: "gray",
-        padding: 12,
-        marginBottom: 15,
-        borderRadius: 5,
-    },
-    button: {
-        backgroundColor: "#2563eb",
-        padding: 15,
-        alignItems: "center",
-    },
-    buttonText: {
-        color: "white",
-    },
-    link: {
-        color: "#2563eb",
-        marginTop: 20,
-        textAlign: "center",
-    },
-});

@@ -20,6 +20,12 @@ const profileSlice = createSlice({
             state.avatar = action.payload.avatar || null;
         },
 
+        setProfileName: (state, action) => {
+            if (state.uid === action.payload.uid) {
+                state.name = action.payload.name;
+            }
+        },
+
         setAvatar: (state, action) => {
             if (state.uid === action.payload.uid) {
                 state.avatar = action.payload.avatar;
@@ -32,6 +38,7 @@ const profileSlice = createSlice({
 
 export const {
     setProfile,
+    setProfileName,
     setAvatar,
     clearProfile,
 } = profileSlice.actions;

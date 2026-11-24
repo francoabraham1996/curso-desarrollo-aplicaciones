@@ -1,18 +1,35 @@
 
-import { useDispatch } from "react-redux";
-import { clearTasks } from "../redux/taskSlice";
-import { setProfile, clearProfile } from "../redux/profileSlice";
-import { getAvatar } from "../services/profileService";
-
 import { useState, useEffect } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { useDispatch } from "react-redux";
 
-import { NavigationContainer } from "@react-navigation/native";
+import {
+    View,
+    Text,
+    ActivityIndicator,
+    StyleSheet,
+} from "react-native";
+
+import {
+    NavigationContainer,
+    DefaultTheme,
+} from "@react-navigation/native";
+
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { Ionicons } from "@expo/vector-icons";
+
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+
+import { clearTasks } from "../redux/taskSlice";
+import {
+    setProfile,
+    clearProfile,
+} from "../redux/profileSlice";
+
+import { getAvatar } from "../services/profileService";
+import { useTaskSync } from "../hooks/useTaskSync";
 import { colors } from "../constants/colors";
 
 import { HomeScreen } from "../screens/HomeScreen";
@@ -21,14 +38,40 @@ import TaskDetailScreen from "../screens/TaskDetailScreen";
 import TaskForm from "../components/TaskForm";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
-import { useTaskSync } from "../hooks/useTaskSync";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+const navigationTheme = {
+    ...DefaultTheme,
+    colors: {
+        ...DefaultTheme.colors,
+        primary: colors.primary,
+        background: colors.background,
+        card: colors.surface,
+        text: colors.text,
+        border: "#E5E7EB",
+    },
+};
+
 function TaskStack() {
     return (
-        <Stack.Navigator>
+        <Stack.Navigator
+            screenOptions={{
+                headerTintColor: colors.primary,
+                headerTitleStyle: {
+                    fontWeight: "600",
+                    color: colors.text,
+                },
+                headerShadowVisible: false,
+                headerStyle: {
+                    backgroundColor: colors.background,
+                },
+                contentStyle: {
+                    backgroundColor: colors.background,
+                },
+            }}
+        >
             <Stack.Screen
                 name="TaskList"
                 component={HomeScreen}
@@ -53,31 +96,63 @@ function TaskStack() {
 function MainTabs() {
     return (
         <Tab.Navigator
-            screenOptions={{
+            screenOptions={({ route }) => ({
+                headerShown: false,
+
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textSecondary,
+
+                tabBarStyle: {
+                    backgroundColor: colors.surface,
+                    borderTopColor: "#E5E7EB",
+                    paddingTop: 6,
+                },
+
                 tabBarLabelStyle: {
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: "600",
                 },
-            }}
+
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName;
+
+                    if (route.name === "Home") {
+                        iconName = focused
+                            ? "list-circle"
+                            : "list-circle-outline";
+                    } else {
+                        iconName = focused
+                            ? "person-circle"
+                            : "person-circle-outline";
+                    }
+
+                    return (
+                        <View
+                            style={[
+                                styles.tabIcon,
+                                focused && styles.tabIconActive,
+                            ]}
+                        >
+                            <Ionicons
+                                name={iconName}
+                                size={size}
+                                color={color}
+                            />
+                        </View>
+                    );
+                },
+            })}
         >
             <Tab.Screen
                 name="Home"
                 component={TaskStack}
-                options={{
-                    title: "Tareas",
-                    headerShown: false,
-                }}
+                options={{ title: "Tareas" }}
             />
 
             <Tab.Screen
                 name="Profile"
                 component={ProfileScreen}
-                options={{
-                    title: "Perfil",
-                    headerShown: false,
-                }}
+                options={{ title: "Perfil" }}
             />
         </Tab.Navigator>
     );
@@ -85,6 +160,7 @@ function MainTabs() {
 
 export default function AppNavigator() {
     const dispatch = useDispatch();
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -94,45 +170,56 @@ export default function AppNavigator() {
         let active = true;
         let requestId = 0;
 
-        const unsubscribe = onAuthStateChanged(auth, async (usuario) => {
-            const currentRequest = ++requestId;
+        const unsubscribe = onAuthStateChanged(
+            auth,
+            async (usuario) => {
+                const currentRequest = ++requestId;
 
-            setLoading(true);
+                if (!active) return;
 
-            dispatch(clearTasks());
-            dispatch(clearProfile());
+                setLoading(true);
 
-            if (!usuario) {
-                setUser(null);
+                dispatch(clearTasks());
+                dispatch(clearProfile());
+
+                if (!usuario) {
+                    setUser(null);
+                    setLoading(false);
+                    return;
+                }
+
+                let avatar = null;
+
+                try {
+                    avatar = await getAvatar(usuario.uid);
+                } catch {
+                    avatar = null;
+                }
+
+                if (
+                    !active ||
+                    currentRequest !== requestId ||
+                    auth.currentUser?.uid !== usuario.uid
+                ) {
+                    return;
+                }
+
+                dispatch(
+                    setProfile({
+                        uid: usuario.uid,
+                        name:
+                            auth.currentUser.displayName ||
+                            usuario.email?.split("@")[0] ||
+                            "Usuario",
+                        email: usuario.email || "",
+                        avatar,
+                    })
+                );
+
+                setUser(usuario);
                 setLoading(false);
-                return;
             }
-
-            let avatar = null;
-
-            try {
-                avatar = await getAvatar(usuario.uid);
-            } catch {
-                avatar = null;
-            }
-
-            if (!active || currentRequest !== requestId) return;
-
-            dispatch(
-                setProfile({
-                    uid: usuario.uid,
-                    name:
-                        usuario.displayName ||
-                        usuario.email?.split("@")[0] ||
-                        "Usuario",
-                    email: usuario.email || "",
-                    avatar,
-                })
-            );
-
-            setUser(usuario);
-            setLoading(false);
-        });
+        );
 
         return () => {
             active = false;
@@ -143,33 +230,51 @@ export default function AppNavigator() {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
+                <View style={styles.logo}>
+                    <Ionicons
+                        name="checkmark-done"
+                        size={42}
+                        color="#FFFFFF"
+                    />
+                </View>
+
+                <Text style={styles.brandName}>
+                    TaskFlow
+                </Text>
+
                 <ActivityIndicator
                     size="large"
                     color={colors.primary}
                 />
+
                 <Text style={styles.loadingText}>
-                    Cargando TaskFlow...
+                    Preparando tu espacio de trabajo...
                 </Text>
             </View>
         );
     }
 
     return (
-        <NavigationContainer>
+        <NavigationContainer theme={navigationTheme}>
             {user ? (
                 <MainTabs key={user.uid} />
             ) : (
-                <Stack.Navigator>
+                <Stack.Navigator
+                    screenOptions={{
+                        headerShown: false,
+                        contentStyle: {
+                            backgroundColor: colors.background,
+                        },
+                    }}
+                >
                     <Stack.Screen
                         name="Login"
                         component={LoginScreen}
-                        options={{ title: "Iniciar sesión" }}
                     />
 
                     <Stack.Screen
                         name="Register"
                         component={RegisterScreen}
-                        options={{ title: "Crear cuenta" }}
                     />
                 </Stack.Navigator>
             )}
@@ -183,11 +288,40 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: colors.background,
+        padding: 20,
+    },
+
+    logo: {
+        width: 75,
+        height: 75,
+        borderRadius: 22,
+        backgroundColor: colors.primary,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 15,
+    },
+
+    brandName: {
+        fontSize: 32,
+        fontWeight: "bold",
+        color: colors.primary,
+        marginBottom: 35,
     },
 
     loadingText: {
         marginTop: 14,
-        fontSize: 16,
+        fontSize: 13,
         color: colors.textSecondary,
+        textAlign: "center",
+    },
+
+    tabIcon: {
+        paddingHorizontal: 18,
+        paddingVertical: 2,
+        borderRadius: 14,
+    },
+
+    tabIconActive: {
+        backgroundColor: "#EEF2FF",
     },
 });

@@ -1,17 +1,19 @@
 {
   "expo": {
-    "name": "mi-app",
-    "slug": "mi-app",
+    "name": "TaskFlow",
+    "slug": "taskflow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.francoabraham.taskflow"
     },
     "android": {
+      "package": "com.francoabraham.taskflow",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#E0E7FF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -21,7 +23,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-status-bar"
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "TaskFlow necesita acceder a tus fotos para personalizar tu perfil.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ]
   }
 }

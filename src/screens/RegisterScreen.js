@@ -1,97 +1,192 @@
 
-import { useState } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-} from "react-native";
+import { useState, useRef } from "react";
+import { useDispatch } from "react-redux";
 
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+    createUserWithEmailAndPassword,
+    updateProfile,
+} from "firebase/auth";
+
 import { auth } from "../firebase/firebaseConfig";
+import { setProfileName } from "../redux/profileSlice";
+
+import {
+    AuthLayout,
+    AuthInput,
+    AuthButton,
+    AuthError,
+    AuthFooter,
+} from "../components/AuthLayout";
+
+import {
+    isValidEmail,
+    getAuthError,
+} from "../services/authService";
 
 export default function RegisterScreen({ navigation }) {
+    const dispatch = useDispatch();
+
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] =
+        useState("");
+
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState("");
+
+    const loadingRef = useRef(false);
+
+    const nameError =
+        submitted && name.trim().length < 2
+            ? "Ingresá tu nombre."
+            : "";
+
+    const emailError =
+        submitted && !isValidEmail(email)
+            ? "Ingresá un correo válido."
+            : "";
+
+    const passwordError =
+        submitted && password.length < 6
+            ? "Debe tener al menos 6 caracteres."
+            : "";
+
+    const confirmError =
+        submitted &&
+            (!confirmPassword || password !== confirmPassword)
+            ? "Las contraseñas no coinciden."
+            : "";
 
     const handleRegister = async () => {
-        if (!email.trim() || password.length < 6) {
-            Alert.alert("Error", "Ingresá un correo y una contraseña de al menos 6 caracteres.");
+        if (loadingRef.current) return;
+
+        setSubmitted(true);
+        setError("");
+
+        if (
+            name.trim().length < 2 ||
+            !isValidEmail(email) ||
+            password.length < 6 ||
+            password !== confirmPassword
+        ) {
             return;
         }
 
+        loadingRef.current = true;
+        setLoading(true);
+
         try {
-            await createUserWithEmailAndPassword(auth, email.trim(), password);
+            const credential =
+                await createUserWithEmailAndPassword(
+                    auth,
+                    email.trim(),
+                    password
+                );
+
+            try {
+                await updateProfile(credential.user, {
+                    displayName: name.trim(),
+                });
+
+                if (
+                    auth.currentUser?.uid === credential.user.uid
+                ) {
+                    dispatch(
+                        setProfileName({
+                            uid: credential.user.uid,
+                            name: name.trim(),
+                        })
+                    );
+                }
+            } catch {
+                // La cuenta ya existe y el usuario está autenticado.
+                // Si falla el nombre, se utilizará el correo.
+            }
         } catch (error) {
-            Alert.alert("Error", "No se pudo crear la cuenta. Revisá los datos.");
+            setError(getAuthError(error));
+        } finally {
+            loadingRef.current = false;
+            setLoading(false);
         }
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Crear cuenta</Text>
+        <AuthLayout
+            title="Creá tu cuenta"
+            subtitle="Empezá a organizar tus tareas con TaskFlow."
+            footer={
+                <AuthFooter
+                    text="¿Ya tenés una cuenta?"
+                    action="Iniciar sesión"
+                    disabled={loading}
+                    onPress={() => navigation.goBack()}
+                />
+            }
+        >
+            <AuthInput
+                label="Nombre completo"
+                icon="person-outline"
+                placeholder="Tu nombre"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                autoComplete="name"
+                editable={!loading}
+                error={nameError}
+                maxLength={80}
+            />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Correo electrónico"
+            <AuthInput
+                label="Correo electrónico"
+                icon="mail-outline"
+                placeholder="usuario@email.com"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
+                autoCorrect={false}
                 keyboardType="email-address"
+                autoComplete="email"
+                editable={!loading}
+                error={emailError}
             />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Contraseña (mínimo 6 caracteres)"
+            <AuthInput
+                label="Contraseña"
+                icon="lock-closed-outline"
+                placeholder="Mínimo 6 caracteres"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                password
+                autoCapitalize="none"
+                autoComplete="new-password"
+                editable={!loading}
+                error={passwordError}
             />
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                <Text style={styles.buttonText}>Registrarme</Text>
-            </TouchableOpacity>
+            <AuthInput
+                label="Confirmar contraseña"
+                icon="lock-closed-outline"
+                placeholder="Repetí tu contraseña"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                password
+                autoCapitalize="none"
+                autoComplete="new-password"
+                editable={!loading}
+                error={confirmError}
+                returnKeyType="go"
+                onSubmitEditing={handleRegister}
+            />
 
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Text style={styles.link}>Ya tengo una cuenta</Text>
-            </TouchableOpacity>
-        </View>
+            <AuthError message={error} />
+
+            <AuthButton
+                title="Crear mi cuenta"
+                loading={loading}
+                onPress={handleRegister}
+            />
+        </AuthLayout>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        justifyContent: "center",
-        backgroundColor: "#f5f5f5",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: "gray",
-        backgroundColor: "white",
-        padding: 12,
-        marginBottom: 15,
-        borderRadius: 5,
-    },
-    button: {
-        backgroundColor: "#2563eb",
-        padding: 15,
-        alignItems: "center",
-    },
-    buttonText: {
-        color: "white",
-    },
-    link: {
-        color: "#2563eb",
-        textAlign: "center",
-        marginTop: 20,
-    },
-});
