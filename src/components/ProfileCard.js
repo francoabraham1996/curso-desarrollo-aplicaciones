@@ -1,75 +1,160 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+
 import { colors } from "../constants/colors";
 
-// View será el contenedor de la tarjeta, Text mostrará nombre y rol, Image mostrará el avatar y StyleSheet nos permitirá diseñarla sin meter estilos grandes directamente en el JSX.
+export const ProfileCard = ({
+  name,
+  role,
+  image,
+  onChangeImage,
+  loading = false,
+}) => {
+  const initials = (name || "Usuario")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("");
 
-// type Props = {
-//     name: String;
-//     role: String;
-//     image: String,
-// }
-
-// function ProfileCard({name, role, image} : Props) {
-//     return(
-//         <view>
-//             <Image source={{uri: image} style={}}/>
-//             <view>
-//                 <text>{name}</text>
-//                 <text>{role}</text>
-//             </view>
-//         </view>
-//     )
-// }
-
-
-
-export const ProfileCard = ({ name, role, image }) => {
   return (
     <View style={styles.card}>
-      <Image
-        source={{ uri: image }}
-        style={styles.image}
-      />
+      <TouchableOpacity
+        onPress={onChangeImage}
+        disabled={loading}
+        activeOpacity={0.8}
+        accessibilityLabel="Cambiar foto de perfil"
+        style={styles.avatarContainer}
+      >
+        {image ? (
+          <Image
+            source={{ uri: image }}
+            style={styles.image}
+          />
+        ) : (
+          <View style={styles.placeholder}>
+            <Text style={styles.initials}>
+              {initials}
+            </Text>
+          </View>
+        )}
 
-      <View style={styles.info}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.role}>{role}</Text>
-      </View>
+        <View style={styles.editBadge}>
+          {loading ? (
+            <ActivityIndicator
+              size="small"
+              color="#FFFFFF"
+            />
+          ) : (
+            <Text style={styles.editIcon}>✎</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+
+      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.role}>{role}</Text>
+
+      <TouchableOpacity
+        onPress={onChangeImage}
+        disabled={loading}
+        style={styles.changeButton}
+      >
+        <Text style={styles.changeButtonText}>
+          {loading ? "Guardando..." : "Cambiar foto de perfil"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: "row",
-    // hace que la foto y los textos queden uno al lado del otro. 
     alignItems: "center",
     backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    margin: 16,
-    elevation: 4,
+    padding: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  avatarContainer: {
+    position: "relative",
+    marginBottom: 16,
   },
 
   image: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
   },
 
-  info: {
-    marginLeft: 16,
+  placeholder: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "#E0E7FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  initials: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: colors.primary,
+  },
+
+  editBadge: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.primary,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  editIcon: {
+    fontSize: 19,
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 
   name: {
-    fontSize: 20,
+    fontSize: 23,
     fontWeight: "bold",
     color: colors.text,
+    textAlign: "center",
   },
 
   role: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.textSecondary,
-    marginTop: 4,
+    marginTop: 6,
+    textAlign: "center",
+  },
+
+  changeButton: {
+    backgroundColor: "#EEF2FF",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginTop: 18,
+  },
+
+  changeButtonText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "600",
   },
 });

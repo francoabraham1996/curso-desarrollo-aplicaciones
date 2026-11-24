@@ -1,7 +1,11 @@
+
 import { useDispatch } from "react-redux";
 import { clearTasks } from "../redux/taskSlice";
+import { setProfile, clearProfile } from "../redux/profileSlice";
+import { getAvatar } from "../services/profileService";
+
 import { useState, useEffect } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -9,6 +13,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+import { colors } from "../constants/colors";
 
 import { HomeScreen } from "../screens/HomeScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
@@ -46,17 +51,32 @@ function TaskStack() {
 
 function MainTabs() {
     return (
-        <Tab.Navigator>
+        <Tab.Navigator
+            screenOptions={{
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.textSecondary,
+                tabBarLabelStyle: {
+                    fontSize: 13,
+                    fontWeight: "600",
+                },
+            }}
+        >
             <Tab.Screen
                 name="Home"
                 component={TaskStack}
-                options={{ title: "Tareas", headerShown: false }}
+                options={{
+                    title: "Tareas",
+                    headerShown: false,
+                }}
             />
 
             <Tab.Screen
                 name="Profile"
                 component={ProfileScreen}
-                options={{ title: "Perfil" }}
+                options={{
+                    title: "Perfil",
+                    headerShown: false,
+                }}
             />
         </Tab.Navigator>
     );
@@ -67,25 +87,66 @@ export default function AppNavigator() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (usuario) => {
-            setUser(usuario);
-            setLoading(false);
+        let active = true;
+        let requestId = 0;
+
+        const unsubscribe = onAuthStateChanged(auth, async (usuario) => {
+            const currentRequest = ++requestId;
+
+            setLoading(true);
+
+            dispatch(clearTasks());
+            dispatch(clearProfile());
 
             if (!usuario) {
-                dispatch(clearTasks());
+                setUser(null);
+                setLoading(false);
+                return;
             }
+
+            let avatar = null;
+
+            try {
+                avatar = await getAvatar(usuario.uid);
+            } catch {
+                avatar = null;
+            }
+
+            if (!active || currentRequest !== requestId) return;
+
+            dispatch(
+                setProfile({
+                    uid: usuario.uid,
+                    name:
+                        usuario.displayName ||
+                        usuario.email?.split("@")[0] ||
+                        "Usuario",
+                    email: usuario.email || "",
+                    avatar,
+                })
+            );
+
+            setUser(usuario);
+            setLoading(false);
         });
 
-        return unsubscribe;
+        return () => {
+            active = false;
+            unsubscribe();
+        };
     }, [dispatch]);
-
 
     if (loading) {
         return (
-            <View>
-                <Text>Cargando...</Text>
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator
+                    size="large"
+                    color={colors.primary}
+                />
+                <Text style={styles.loadingText}>
+                    Cargando TaskFlow...
+                </Text>
             </View>
         );
     }
@@ -93,7 +154,7 @@ export default function AppNavigator() {
     return (
         <NavigationContainer>
             {user ? (
-                <MainTabs />
+                <MainTabs key={user.uid} />
             ) : (
                 <Stack.Navigator>
                     <Stack.Screen
@@ -112,3 +173,18 @@ export default function AppNavigator() {
         </NavigationContainer>
     );
 }
+
+const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: colors.background,
+    },
+
+    loadingText: {
+        marginTop: 14,
+        fontSize: 16,
+        color: colors.textSecondary,
+    },
+});
